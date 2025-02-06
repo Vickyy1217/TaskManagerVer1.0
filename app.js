@@ -10,7 +10,6 @@ function addTask(e) {
     const project = document.getElementById('project').value;
 
     const id = Date.now(); // Unique identifier
-
     const task = {
         id,
         taskName,
