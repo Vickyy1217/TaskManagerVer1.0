@@ -1,0 +1,118 @@
+@font-face {
+    font-family: "San Francisco Display Ultralight";
+    font-style: normal;
+    font-weight: 400;
+    src: url(https://applesocial.s3.amazonaws.com/assets/styles/fonts/sanfrancisco/sanfranciscodisplay-ultralight-webfont.eot?#iefix) format("embedded-opentype"), url(https://applesocial.s3.amazonaws.com/assets/styles/fonts/sanfrancisco/sanfranciscodisplay-ultralight-webfont.woff2) format("woff2"), url(https://applesocial.s3.amazonaws.com/assets/styles/fonts/sanfrancisco/sanfranciscodisplay-ultralight-webfont.woff) format("woff"), url(https://applesocial.s3.amazonaws.com/assets/styles/fonts/sanfrancisco/sanfranciscodisplay-ultralight-webfont.ttf) format("truetype"), url("fonts/sanfrancisco/sanfranciscodisplay-ultralight-webfont.svg#San Francisco Display Ultralight") format("svg")
+  }
+@font-face {
+    font-family: "San Francisco Display Thin";
+    font-style: normal;
+    font-weight: 400;
+    src: url(https://applesocial.s3.amazonaws.com/assets/styles/fonts/sanfrancisco/sanfranciscodisplay-thin-webfont.eot?#iefix) format("embedded-opentype"), url(https://applesocial.s3.amazonaws.com/assets/styles/fonts/sanfrancisco/sanfranciscodisplay-thin-webfont.woff2) format("woff2"), url(https://applesocial.s3.amazonaws.com/assets/styles/fonts/sanfrancisco/sanfranciscodisplay-thin-webfont.woff) format("woff"), url(https://applesocial.s3.amazonaws.com/assets/styles/fonts/sanfrancisco/sanfranciscodisplay-thin-webfont.ttf) format("truetype"), url("fonts/sanfrancisco/sanfranciscodisplay-thin-webfont.svg#San Francisco Display Thin") format("svg")
+  }
+@font-face {
+    font-family: "San Francisco Display Medium";
+    font-style: normal;
+    font-weight: 400;
+    src: url(https://applesocial.s3.amazonaws.com/assets/styles/fonts/sanfrancisco/sanfranciscodisplay-medium-webfont.eot?#iefix) format("embedded-opentype"), url(https://applesocial.s3.amazonaws.com/assets/styles/fonts/sanfrancisco/sanfranciscodisplay-medium-webfont.woff2) format("woff2"), url(https://applesocial.s3.amazonaws.com/assets/styles/fonts/sanfrancisco/sanfranciscodisplay-medium-webfont.woff) format("woff"), url(https://applesocial.s3.amazonaws.com/assets/styles/fonts/sanfrancisco/sanfranciscodisplay-medium-webfont.ttf) format("truetype"), url("fonts/sanfrancisco/sanfranciscodisplay-medium-webfont.svg#San Francisco Display Medium") format("svg")
+  }
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+body {
+    font-family: "San Francisco Display Ultralight", "San Francisco Display Thin";
+    background-color: #f9f9f9;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+.container {
+    width: 80%;
+    margin: 20px auto;
+}
+h1 {
+    color: #333;
+    font-family: "San Francisco Display Medium";
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+form {
+    font-family: "San Francisco Display Ultralight";
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+form input, form button {
+    font-family: "San Francisco Display Ultralight";
+    padding: 10px;
+    font-size: 1em;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-right: 10px;
+}
+
+form button {
+    font-family: "San Francisco Display Ultralight";
+    background-color: #28a745;
+    color: white;
+    cursor: pointer;
+    border: none;
+}
+
+form button:hover {
+    background-color: #218838;
+}
+
+#task-list tr {
+    transition: transform 0.3s ease, opacity 0.3s ease; /* Transición suave */
+}
+.completed {
+    text-decoration: line-through;
+    color: gray;
+    opacity: 0.5; /* Opción para hacer más visible la tarea completada */
+}
+.task-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.task-table th,
+.task-table td {
+    font-family: "San Francisco Display Ultralight";
+    padding: 15px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.task-table th {
+    background-color: #f4f4f4;
+    font-weight: bold;
+}
+
+.task-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+button.delete-btn {
+    font-family: "San Francisco Display Ultralight";
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 8px;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+button.delete-btn:hover {
+    font-family: "San Francisco Display Ultralight";
+    background-color: #c82333;
+}

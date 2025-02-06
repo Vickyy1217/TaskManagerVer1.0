@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Tasks</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>My Tasks</h1>
+        
+        <!-- Formulario para agregar nuevas tareas -->
+        <form id="task-form">
+            <input type="text" id="task-name" placeholder="Task name" required>
+            <input type="date" id="due-date" required>
+            <input type="text" id="project" placeholder="Project name" required>
+            <button type="submit">Add Task</button>
+        </form>
+
+        <!-- Tabla para mostrar las tareas agregadas -->
+        <table class="task-table">
+            <thead>
+                <tr>
+                    <th>Status</th>
+                    <th>Task name</th>
+                    <th>Due date</th>
+                    <th>Project</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="task-list">
+                <!-- Aquí se agregarán las tareas dinámicamente -->
+            </tbody>
+        </table>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
