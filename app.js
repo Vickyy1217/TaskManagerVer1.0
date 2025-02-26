@@ -1,4 +1,8 @@
-document.addEventListener('DOMContentLoaded', loadTasks);
+document.addEventListener('DOMContentLoaded', () => {
+    loadTasks();
+    checkUpcomingDeadlines();
+});
+
 document.getElementById('task-form').addEventListener('submit', addTask);
 
 // Función para agregar una tarea
@@ -23,6 +27,7 @@ function addTask(e) {
 
     storeTaskInLocalStorage(task);
     refreshTaskList();
+    checkUpcomingDeadlines();
     document.getElementById('task-form').reset();
 }
 
@@ -32,6 +37,10 @@ function addTaskToDOM(task) {
     taskRow.setAttribute('data-id', task.id);
     taskRow.classList.toggle('completed', task.completed);
     taskRow.classList.add(task.priority); // Aplica color de prioridad
+    
+    if (task.completed) {
+        taskRow.classList.add('task-completed');
+    }
 
     taskRow.innerHTML = `
         <td><input type="checkbox" class="complete-btn" ${task.completed ? 'checked' : ''}></td>
@@ -71,12 +80,40 @@ function toggleTaskCompletion(taskId, taskRow) {
         if (task.id === parseInt(taskId)) {
             task.completed = !task.completed;
             taskRow.classList.toggle('completed', task.completed);
+            if (task.completed) {
+                taskRow.classList.add('task-completed');
+            } else {
+                taskRow.classList.remove('task-completed');
+            }
         }
         return task;
     });
     saveTasksToLocalStorage(tasks);
     refreshTaskList();
 }
+
+// Verificar tareas próximas a vencer
+function checkUpcomingDeadlines() {
+    const now = new Date();
+    let tasks = getTasksFromLocalStorage();
+    const notifications = document.getElementById('notifications');
+    notifications.innerHTML = '';
+    
+    tasks.forEach(task => {
+        const taskDueDate = new Date(task.dueDate);
+        const timeDiff = taskDueDate - now;
+        const hoursDiff = timeDiff / (1000 * 60 * 60);
+        
+        if (hoursDiff > 0 && hoursDiff <= 24 && !task.completed) {
+            const notification = document.createElement('div');
+            notification.classList.add('notification');
+            notification.textContent = `Tarea próxima a vencer: ${task.taskName} - ${task.dueDate}`;
+            notifications.appendChild(notification);
+        }
+    });
+}
+
+// Otras funciones sin cambios...
 
 // Cargar tareas ordenadas por fecha límite
 function loadTasks() {
