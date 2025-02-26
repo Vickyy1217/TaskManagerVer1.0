@@ -16,19 +16,12 @@
             <input type="date" id="due-date" required>
             <input type="text" id="project" placeholder="Project name" required>
             <select id="priority" required>
-                <option value="high">High Priority</option>
-                <option value="medium">Medium Priority</option>
-                <option value="low">Low Priority</option>
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
             </select>
             <button type="submit">Add Task</button>
         </form>
-
-        <!-- Lista de subtareas -->
-        <div id="subtask-section">
-            <input type="text" id="subtask-name" placeholder="Subtask name">
-            <button type="button" id="add-subtask">Add Subtask</button>
-            <ul id="subtask-list"></ul>
-        </div>
 
         <!-- Tabla para mostrar las tareas agregadas -->
         <table class="task-table">
@@ -48,6 +41,22 @@
         </table>
     </div>
 
+    <!-- Sección para agregar subtareas -->
+    <div id="subtask-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h2>Subtasks</h2>
+            <form id="subtask-form">
+                <input type="text" id="subtask-name" placeholder="Subtask name" required>
+                <button type="submit">Add Subtask</button>
+            </form>
+            <ul id="subtask-list">
+                <!-- Aquí se mostrarán las subtareas -->
+            </ul>
+        </div>
+    </div>
+
     <script src="app.js"></script>
 </body>
 </html>
+
