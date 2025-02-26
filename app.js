@@ -1,122 +1,123 @@
 document.addEventListener('DOMContentLoaded', loadTasks);
 document.getElementById('task-form').addEventListener('submit', addTask);
 
-// Function to add a task
 function addTask(e) {
     e.preventDefault();
 
     const taskName = document.getElementById('task-name').value;
     const dueDate = document.getElementById('due-date').value;
     const project = document.getElementById('project').value;
+    const priority = document.getElementById('priority').value;
 
-    const id = Date.now(); // Unique identifier
+    const id = Date.now();
     const task = {
         id,
         taskName,
         dueDate,
         project,
-        completed: false
+        priority,
+        completed: false,
+        subtasks: []
     };
 
     addTaskToDOM(task);
     storeTaskInLocalStorage(task);
-
     document.getElementById('task-form').reset();
+    sortTasks();
 }
 
-// Function to add task to the DOM
 function addTaskToDOM(task) {
     const taskRow = document.createElement('tr');
     taskRow.setAttribute('data-id', task.id);
-    taskRow.classList.toggle('completed', task.completed); // Add 'completed' class if task is completed
+    taskRow.classList.add(task.priority);
 
     taskRow.innerHTML = `
-        <td>
-            <input type="checkbox" class="complete-btn" ${task.completed ? 'checked' : ''}>
-        </td>        
+        <td><input type="checkbox" class="complete-btn" ${task.completed ? 'checked' : ''}></td>
         <td>${task.taskName}</td>
         <td>${task.dueDate}</td>
         <td>${task.project}</td>
         <td>
             <button class="delete-btn">Delete</button>
+            <button class="add-subtask-btn">+ Subtask</button>
+            <div class="subtasks"></div>
         </td>
     `;
 
-    // Append completed tasks at the end or prepend non-completed tasks at the beginning
     document.getElementById('task-list').appendChild(taskRow);
 }
 
-// Event delegation for deleting or completing a task
 document.getElementById('task-list').addEventListener('click', function(e) {
-    const taskRow = e.target.parentElement.parentElement;
+    const taskRow = e.target.closest('tr');
     const taskId = taskRow.getAttribute('data-id');
 
     if (e.target.classList.contains('delete-btn')) {
-        taskRow.remove(); // Remove from DOM
-        removeTaskFromLocalStorage(taskId); // Remove from localStorage
+        taskRow.remove();
+        removeTaskFromLocalStorage(taskId);
     } else if (e.target.classList.contains('complete-btn')) {
-        toggleTaskCompletion(taskId, taskRow); // Mark task as completed or not
+        toggleTaskCompletion(taskId, taskRow);
+    } else if (e.target.classList.contains('add-subtask-btn')) {
+        addSubtask(taskId, taskRow);
+    } else if (e.target.classList.contains('delete-subtask-btn')) {
+        removeSubtask(taskId, e.target.dataset.subtaskId, taskRow);
     }
 });
 
-// Toggle task completion
-function toggleTaskCompletion(taskId, taskRow) {
-    let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
-    tasks = tasks.map(task => {
-        if (task.id === parseInt(taskId)) {
-            task.completed = !task.completed;
-            // Animate the row
-            taskRow.classList.toggle('completed', task.completed); // Toggle completed class
-            // Allow time for the CSS transition before removing from DOM
-            if (task.completed) {
-                taskRow.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
-                taskRow.style.opacity = '0'; // Fade out
-                setTimeout(() => {
-                    document.getElementById('task-list').appendChild(taskRow); // Move to end
-                    taskRow.style.opacity = '1'; // Fade in
-                }, 300); // Match the duration of your transition
-            } else {
-                document.getElementById('task-list').prepend(taskRow); // Move back to the top if not completed
-            }
-        }
-        return task;
-    });
+function addSubtask(taskId, taskRow) {
+    const subtaskName = prompt("Enter subtask name:");
+    if (!subtaskName) return;
 
+    let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+    const task = tasks.find(t => t.id == taskId);
+    const subtaskId = Date.now();
+    task.subtasks.push({ id: subtaskId, name: subtaskName });
+
+    updateLocalStorage(tasks);
+    displaySubtasks(task, taskRow);
+}
+
+function displaySubtasks(task, taskRow) {
+    const subtaskContainer = taskRow.querySelector('.subtasks');
+    subtaskContainer.innerHTML = '';
+
+    task.subtasks.forEach(subtask => {
+        const subtaskElement = document.createElement('div');
+        subtaskElement.classList.add('subtask-item');
+        subtaskElement.innerHTML = `
+            ${subtask.name}
+            <button class="delete-subtask-btn" data-subtask-id="${subtask.id}">X</button>
+        `;
+        subtaskContainer.appendChild(subtaskElement);
+    });
+}
+
+function removeSubtask(taskId, subtaskId, taskRow) {
+    let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+    const task = tasks.find(t => t.id == taskId);
+    task.subtasks = task.subtasks.filter(s => s.id != subtaskId);
+
+    updateLocalStorage(tasks);
+    displaySubtasks(task, taskRow);
+}
+
+function sortTasks() {
+    let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+    tasks.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
+    updateLocalStorage(tasks);
+    refreshTaskList();
+}
+
+function updateLocalStorage(tasks) {
     localStorage.setItem('tasks', JSON.stringify(tasks));
 }
 
-// Refresh the task list (clear and reload tasks from localStorage)
 function refreshTaskList() {
-    const taskList = document.getElementById('task-list');
-    const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
-
-    taskList.innerHTML = ''; // Clear task list
-
-    // Reinsert tasks in order
-    tasks.forEach(task => {
-        addTaskToDOM(task);
-    });
+    document.getElementById('task-list').innerHTML = '';
+    loadTasks();
 }
 
-// Store task in localStorage
-function storeTaskInLocalStorage(task) {
-    let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
-    tasks.push(task);
-    localStorage.setItem('tasks', JSON.stringify(tasks));
-}
-
-// Load tasks from localStorage on page load
 function loadTasks() {
     let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
-
     tasks.forEach(task => {
         addTaskToDOM(task);
     });
-}
-
-// Remove task from localStorage by ID
-function removeTaskFromLocalStorage(taskId) {
-    let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
-    tasks = tasks.filter(task => task.id !== parseInt(taskId));
-    localStorage.setItem('tasks', JSON.stringify(tasks));
 }
