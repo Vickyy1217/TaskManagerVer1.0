@@ -9,3 +9,5 @@ Tenemos una tabla en la cual se mostran nuestras tareas pendientes por hacer, pa
 una vez hecho esto, solo damos click en el boton de agregar la tarea y aparecera agregada.
 Para eliminar la tarea solo se necesita hacer click en el boton de eliminar y se eliminara.
 Las tareas se almacenan incluso si se cierra la pagina o actualiza, ya que se almacenan de manera local.
+
+jajaaj esta chida la tarea
