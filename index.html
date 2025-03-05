@@ -8,37 +8,37 @@
 </head>
 <body>
     <div class="container">
-        <h1>My Tasks</h1>
+        <h1>TaskFlow</h1>
         
         <!-- Icono de notificaciones -->
         <div class="notification-container">
-            <span class="bell-icon">🔔</span>
-            <div id="notifications" class="notification-dropdown"></div>
+            <button class="bell-icon" id="bell-icon">🔔</button>
+            <div id="notifications" class="hidden"></div>
         </div>
         
         <!-- Formulario para agregar nuevas tareas -->
         <form id="task-form">
-            <input type="text" id="task-name" placeholder="Task name" required>
+            <input type="text" id="task-name" placeholder="Nombre de la tarea" required>
             <input type="date" id="due-date" required>
-            <input type="text" id="project" placeholder="Project name" required>
+            <input type="text" id="project" placeholder="Categoría" required>
             <select id="priority" required>
-                <option value="low">Low</option>
-                <option value="medium">Medium</option>
-                <option value="high">High</option>
+                <option value="baja">Baja</option>
+                <option value="media">Media</option>
+                <option value="alta">Alta</option>
             </select>
-            <button type="submit">Add Task</button>
+            <button type="submit">--Añadir--</button>
         </form>
 
         <!-- Tabla para mostrar las tareas agregadas -->
         <table class="task-table">
             <thead>
                 <tr>
-                    <th>Status</th>
-                    <th>Task name</th>
-                    <th>Due date</th>
-                    <th>Project</th>
-                    <th>Priority</th>
-                    <th>Actions</th>
+                    <th>Completado</th>
+                    <th>Nombre</th>
+                    <th>Fecha Límite</th>
+                    <th>Categoría</th>
+                    <th>Prioridad</th>
+                    <th>Acciones</th>
                 </tr>
             </thead>
             <tbody id="task-list">
@@ -46,22 +46,6 @@
             </tbody>
         </table>
     </div>
-
-    <!-- Sección para agregar subtareas -->
-    <div id="subtask-modal" class="modal">
-        <div class="modal-content">
-            <span class="close-button">&times;</span>
-            <h2>Subtasks</h2>
-            <form id="subtask-form">
-                <input type="text" id="subtask-name" placeholder="Subtask name" required>
-                <button type="submit">Add Subtask</button>
-            </form>
-            <ul id="subtask-list">
-                <!-- Aquí se mostrarán las subtareas -->
-            </ul>
-        </div>
-    </div>
-
     <script src="app.js"></script>
 </body>
 </html>

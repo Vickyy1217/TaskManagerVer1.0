@@ -5,6 +5,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
 document.getElementById('task-form').addEventListener('submit', addTask);
 
+document.querySelector('.bell-icon').addEventListener('click', () => {
+    const notifications = document.getElementById('notifications');
+    checkUpcomingDeadlines(); // Actualizar notificaciones al abrir
+    notifications.classList.toggle('hidden');
+});
+
 // Función para agregar una tarea
 function addTask(e) {
     e.preventDefault();
@@ -49,27 +55,33 @@ function addTaskToDOM(task) {
         <td>${task.project}</td>
         <td>${task.priority}</td>
         <td>
-            <button class="delete-btn">Delete</button>
-            <button class="subtask-btn">Subtasks</button>
+            <button class="delete-btn">Eliminar</button>
+            <button class="subtask-btn">Subtareas</button>
         </td>
     `;
 
     document.getElementById('task-list').appendChild(taskRow);
+    addSubtasksToDOM(task);
 }
 
 // Delegación de eventos
 const taskList = document.getElementById('task-list');
-taskList.addEventListener('click', function(e) {
+taskList.addEventListener('click', function (e) {
     const taskRow = e.target.closest('tr');
     const taskId = taskRow.getAttribute('data-id');
 
     if (e.target.classList.contains('delete-btn')) {
+        // Eliminar la tarea y sus subtareas
+        const subtaskContainer = document.querySelector(`.subtasks-container[data-task-id='${taskId}']`);
+        if (subtaskContainer) {
+            subtaskContainer.remove();
+        }
         taskRow.remove();
         removeTaskFromLocalStorage(taskId);
     } else if (e.target.classList.contains('complete-btn')) {
         toggleTaskCompletion(taskId, taskRow);
     } else if (e.target.classList.contains('subtask-btn')) {
-        openSubtaskModal(taskId);
+        toggleSubtaskView(taskId);
     }
 });
 
@@ -81,9 +93,9 @@ function toggleTaskCompletion(taskId, taskRow) {
             task.completed = !task.completed;
             taskRow.classList.toggle('completed', task.completed);
             if (task.completed) {
-                taskRow.classList.add('task-completed');
+                taskRow.style.backgroundColor = '#d3d3d3'; // Gris claro
             } else {
-                taskRow.classList.remove('task-completed');
+                taskRow.style.backgroundColor = ''; // Restaurar color original
             }
         }
         return task;
@@ -92,28 +104,129 @@ function toggleTaskCompletion(taskId, taskRow) {
     refreshTaskList();
 }
 
-// Verificar tareas próximas a vencer
-function checkUpcomingDeadlines() {
-    const now = new Date();
-    let tasks = getTasksFromLocalStorage();
-    const notifications = document.getElementById('notifications');
-    notifications.innerHTML = '';
+// Mostrar subtareas debajo de la tarea principal
+// function addSubtasksToDOM(task) {
+//     const taskRow = document.querySelector(`[data-id='${task.id}']`);
+//     const subtaskContainer = document.createElement('tr');
+//     subtaskContainer.classList.add('subtasks-container');
+//     subtaskContainer.setAttribute('data-task-id', task.id);
+//     subtaskContainer.innerHTML = `<td colspan="6"><ul class="subtask-list"></ul><form class="subtask-form"><input type="text" class="subtask-input" placeholder="Nueva subtarea" required><button type="submit">Añadir</button></form></td>`;
     
-    tasks.forEach(task => {
-        const taskDueDate = new Date(task.dueDate);
-        const timeDiff = taskDueDate - now;
-        const hoursDiff = timeDiff / (1000 * 60 * 60);
-        
-        if (hoursDiff > 0 && hoursDiff <= 24 && !task.completed) {
-            const notification = document.createElement('div');
-            notification.classList.add('notification');
-            notification.textContent = `Tarea próxima a vencer: ${task.taskName} - ${task.dueDate}`;
-            notifications.appendChild(notification);
+//     taskRow.after(subtaskContainer);
+    
+//     const subtaskList = subtaskContainer.querySelector('.subtask-list');
+//     task.subtasks.forEach(subtask => {
+//         const li = document.createElement('li');
+//         li.innerHTML = `${subtask.name} <button class="delete-subtask" data-id="${subtask.id}" data-task-id="${task.id}">❌</button>`;
+//         subtaskList.appendChild(li);
+//     });
+
+//     subtaskContainer.querySelector('.subtask-form').addEventListener('submit', function(e) {
+//         e.preventDefault();
+//         addSubtask(task.id, this.querySelector('.subtask-input').value);
+//         this.reset();
+//     });
+// }
+
+function addSubtasksToDOM(task) {
+    const taskRow = document.querySelector(`[data-id='${task.id}']`);
+    const subtaskContainer = document.createElement('tr');
+    subtaskContainer.classList.add('subtasks-container');
+    subtaskContainer.setAttribute('data-task-id', task.id);
+    subtaskContainer.innerHTML = `
+        <td colspan="6">
+            <ul class="subtask-list"></ul>
+            <form class="subtask-form">
+                <input type="text" class="subtask-input" placeholder="New subtask" required>
+                <button type="submit">Add</button>
+            </form>
+        </td>
+    `;
+
+    taskRow.after(subtaskContainer);
+
+    const subtaskList = subtaskContainer.querySelector('.subtask-list');
+    task.subtasks.forEach(subtask => {
+        const li = document.createElement('li');
+        li.innerHTML = `
+            ${subtask.name} 
+            <button class="delete-subtask" data-id="${subtask.id}" data-task-id="${task.id}">❌</button>
+        `;
+        subtaskList.appendChild(li);
+    });
+
+    // Manejar el evento de clic para eliminar subtareas
+    subtaskList.addEventListener('click', function (e) {
+        if (e.target.classList.contains('delete-subtask')) {
+            const subtaskId = e.target.getAttribute('data-id');
+            const taskId = e.target.getAttribute('data-task-id');
+            removeSubtask(taskId, subtaskId);
         }
+    });
+
+    // Manejar el evento de agregar subtareas
+    subtaskContainer.querySelector('.subtask-form').addEventListener('submit', function (e) {
+        e.preventDefault();
+        addSubtask(task.id, this.querySelector('.subtask-input').value);
+        this.reset();
     });
 }
 
-// Otras funciones sin cambios...
+// Alternar la vista de subtareas
+function toggleSubtaskView(taskId) {
+    const subtaskContainer = document.querySelector(`.subtasks-container[data-task-id='${taskId}']`);
+    if (subtaskContainer) {
+        subtaskContainer.classList.toggle('hidden');
+    }
+}
+
+// Agregar subtarea
+function addSubtask(taskId, subtaskName) {
+    let tasks = getTasksFromLocalStorage();
+    tasks = tasks.map(task => {
+        if (task.id === parseInt(taskId)) {
+            task.subtasks.push({ id: Date.now(), name: subtaskName });
+        }
+        return task;
+    });
+    saveTasksToLocalStorage(tasks);
+    refreshTaskList();
+}
+
+function checkUpcomingDeadlines() {
+    // Obtener la fecha y hora actual en la zona horaria de la Ciudad de México
+    const now = new Date();
+    const timeZone = 'America/Mexico_City'; // Zona horaria de la Ciudad de México
+
+    // Convertir la fecha y hora actual a la zona horaria de la Ciudad de México
+    const nowInMexico = new Date(now.toLocaleString('en-US', { timeZone }));
+
+    // Calcular la fecha y hora en 24 horas en la zona horaria de la Ciudad de México
+    const en24HorasMexico = new Date(nowInMexico.getTime() + 24 * 60 * 60 * 1000);
+
+    let tasks = getTasksFromLocalStorage(); // Obtener las tareas almacenadas en el localStorage
+    const notifications = document.getElementById('notifications'); // Contenedor de notificaciones
+    notifications.innerHTML = ''; // Limpiar notificaciones anteriores
+
+    // console.log("Fecha y hora actual (Ciudad de México):", nowInMexico);
+    // console.log("Fecha y hora en 24 horas (Ciudad de México):", en24HorasMexico);
+
+    tasks.forEach(task => {
+        // Convertir la fecha de vencimiento de la tarea a la zona horaria de la Ciudad de México
+        const taskDueDate = new Date(task.dueDate + 'T00:00:00'); // Asegurar que la hora sea 00:00:00
+        const taskDueDateInMexico = new Date(taskDueDate.toLocaleString('en-US', { timeZone }));
+
+        // console.log(`Tarea: ${task.taskName}, Fecha de vencimiento (Ciudad de México): ${taskDueDateInMexico}`);
+
+        // Si la tarea vence en las próximas 24 horas (Ciudad de México) y no está completada
+        if (taskDueDateInMexico > nowInMexico && taskDueDateInMexico <= en24HorasMexico && !task.completed) {
+            const notification = document.createElement('div'); // Crear un elemento de notificación
+            notification.classList.add('notification'); // Agregar clase de notificación
+            notification.textContent = `Tarea próxima a vencer: ${task.taskName} - ${task.dueDate}`; // Texto de la notificación
+            notifications.appendChild(notification); // Agregar la notificación al contenedor
+        }
+    });
+}
 
 // Cargar tareas ordenadas por fecha límite
 function loadTasks() {
@@ -149,46 +262,7 @@ function saveTasksToLocalStorage(tasks) {
     localStorage.setItem('tasks', JSON.stringify(tasks));
 }
 
-// Funciones de subtareas
-function openSubtaskModal(taskId) {
-    document.getElementById('subtask-modal').style.display = 'block';
-    document.getElementById('subtask-form').setAttribute('data-task-id', taskId);
-    loadSubtasks(taskId);
-}
-
-document.getElementById('subtask-form').addEventListener('submit', function(e) {
-    e.preventDefault();
-    const taskId = this.getAttribute('data-task-id');
-    const subtaskName = document.getElementById('subtask-name').value;
-
-    let tasks = getTasksFromLocalStorage();
-    tasks = tasks.map(task => {
-        if (task.id === parseInt(taskId)) {
-            task.subtasks.push({ id: Date.now(), name: subtaskName });
-        }
-        return task;
-    });
-    saveTasksToLocalStorage(tasks);
-    document.getElementById('subtask-name').value = '';
-    loadSubtasks(taskId);
-});
-
-function loadSubtasks(taskId) {
-    const subtaskList = document.getElementById('subtask-list');
-    subtaskList.innerHTML = '';
-    const tasks = getTasksFromLocalStorage();
-    const task = tasks.find(task => task.id === parseInt(taskId));
-
-    if (task && task.subtasks) {
-        task.subtasks.forEach(subtask => {
-            const li = document.createElement('li');
-            li.innerHTML = `${subtask.name} <button class="delete-subtask" data-id="${subtask.id}" data-task-id="${taskId}">❌</button>`;
-            subtaskList.appendChild(li);
-        });
-    }
-}
-
-document.getElementById('subtask-list').addEventListener('click', function(e) {
+document.getElementById('subtask-list').addEventListener('click', function (e) {
     if (e.target.classList.contains('delete-subtask')) {
         const subtaskId = e.target.getAttribute('data-id');
         const taskId = e.target.getAttribute('data-task-id');
@@ -196,19 +270,25 @@ document.getElementById('subtask-list').addEventListener('click', function(e) {
     }
 });
 
+// Función para eliminar subtarea
 function removeSubtask(taskId, subtaskId) {
     let tasks = getTasksFromLocalStorage();
     tasks = tasks.map(task => {
         if (task.id === parseInt(taskId)) {
+            // Filtrar las subtareas para eliminar la subtarea con el ID correspondiente
             task.subtasks = task.subtasks.filter(subtask => subtask.id !== parseInt(subtaskId));
         }
         return task;
     });
     saveTasksToLocalStorage(tasks);
-    loadSubtasks(taskId);
+    refreshTaskList(); // Recargar la lista de tareas y subtareas en la interfaz
 }
 
-// Cerrar modal de subtareas
-document.querySelector('.close-button').addEventListener('click', function() {
-    document.getElementById('subtask-modal').style.display = 'none';
+// Delegación de eventos para eliminar subtareas
+document.getElementById('task-list').addEventListener('click', function (e) {
+    if (e.target.classList.contains('delete-subtask')) {
+        const subtaskId = e.target.getAttribute('data-id');
+        const taskId = e.target.getAttribute('data-task-id');
+        removeSubtask(taskId, subtaskId);
+    }
 });
